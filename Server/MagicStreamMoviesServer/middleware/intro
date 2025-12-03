@@ -1,0 +1,10 @@
+Will have code for authentication and authorization
+entity . 
+
+Some endpoints will be protected: meaning the
+user will need authentication to access it . 
+
+Contrarily some endpoints need not have authentication
+for user to access the endpoint.
+
+Clearer when authz and Authn.

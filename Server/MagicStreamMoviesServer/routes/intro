@@ -1,0 +1,6 @@
+Will have all the codes for defining
+protected and unprotected routes.
+
+Path for client to access server side code.
+Protected routes pertain to endpoints
+that a user can access only after being authenticated.
