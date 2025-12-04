@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
+
 	controller "github.com/Kudwa-Abhishek/MagicStreamMovies/Server/MagicStreamMoviesServer/controllers" //root path as in go.mod
-) 
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
 	//fmt.Println("Hello go world!")
