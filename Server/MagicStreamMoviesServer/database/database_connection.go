@@ -12,7 +12,7 @@ import (
 
 // Used to connect gin-gonic web API application to our mongodb database through the use of mongodb for go driver
 // Already imported mongo related packages above in import block
-func DBInstance() *mongo.Client {
+func Connect() *mongo.Client {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("Warning: unable to find .env file")
@@ -39,10 +39,10 @@ func DBInstance() *mongo.Client {
 }
 
 // create client object based on db instance
-var Client *mongo.Client = DBInstance()
+
 
 // method which opens our actual connection to database.
-func OpenCollection(collectionName string) *mongo.Collection {
+func OpenCollection(collectionName string, client *mongo.Client) *mongo.Collection {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Println("Warning: unable to find .env file")
@@ -53,7 +53,7 @@ func OpenCollection(collectionName string) *mongo.Collection {
 	fmt.Println("DATABASE_NAME:", databaseName)
 
 	//load the collection
-	collection := Client.Database(databaseName).Collection(collectionName)
+	collection := client.Database(databaseName).Collection(collectionName)
 	if collection == nil {
 		return nil
 	}
