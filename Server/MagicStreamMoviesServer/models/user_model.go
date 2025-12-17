@@ -1,0 +1,41 @@
+// to include user struct which will represent user model which will contain auth and general details
+package models
+
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
+
+type User struct {
+	ID              bson.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	UserID          string        `json:"user_id" bson:"user_id"`
+	FirstName       string        `json:"first_name" bson:"first_name" validate:"required,min=2,max=100"`
+	LastName        string        `json:"last_name" bson:"last_name" validate:"required,min=2,max=100"`
+	Email           string        `json:"email" bson:"email" validate:"email,required"`
+	Password        string        `json:"password" bson:"password" validate:"required,min=6"`
+	Role            string        `json:"role" bson:"role" validate:"oneof=ADMIN USER"` //role -> either admin or user
+	CreatedAt       time.Time     `json:"created_at" bson:"created_at"`
+	UpdatedAt       time.Time     `json:"updated_at" bson:"updated_at"`
+	Token           string        `json:"token" bson:"token"` // we'll be using JWT/ JSON web token for authn, authz.
+	RefreshToken    string        `json:"refresh_token" bson:"refresh_token"`
+	FavouriteGenres []Genre       `json:"favourite_genres" bson:"favourite_genres" validate:"required,dive"` // array of genres user likes-> this Genre is got from movie_model.go itself bcuz of same package models
+}
+
+// struct for user login bhai
+type UserLogin struct {
+	Email    string `json:"email" validate:"email,required"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
+// User response struct, this model is a DTO -> Data Transfer Object -> design pattern used to transfer data between software application subsystems/ frontend and backend.
+type UserResponse struct {
+	UserId          string  `json:"user_id"`
+	FirstName       string  `json:"first_name"`
+	LastName        string  `json:"last_name"`
+	Email           string  `json:"email"`
+	Role            string  `json:"role"`
+	Token           string  `json:"token"`
+	RefreshToken    string  `json:"refresh_token"`
+	FavouriteGenres []Genre `json:"favourite_genres"`
+}
