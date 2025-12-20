@@ -9,7 +9,7 @@ import (
 
 // create a func to setup protected routes
 func SetupProtectedRoutes(router *gin.Engine, client *mongo.Client) {
-	router.Use(middleware.AuthMiddleware()) // applying auth middleware to all routes defined in this func
+	router.Use(middleware.AuthMiddleware()) // applying auth middleware to all routes defined in this func  -> should uncomment later
 
 	//endpoints that need protection go here
 	router.POST("/addmovie", controller.AddMovie(client))
