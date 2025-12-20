@@ -406,3 +406,4 @@ func GetGenres(client *mongo.Client) gin.HandlerFunc {
 
 	}
 }
+//handler Function for an endpoint that can be used to retrieve all of the genres stored within genres collection.

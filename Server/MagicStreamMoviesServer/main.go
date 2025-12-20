@@ -41,22 +41,23 @@ func main() {
 			log.Println("Allowed Origin:", origins[i])
 		}
 	} else {
-		origins = []string{"http://localhost:9845"}
-		log.Println("Allowed Origin: http://localhost:9845")
+		origins = []string{"http://localhost:5173"}
+		log.Println("Allowed Origin: http://localhost:5173")
 	}
 	config := cors.Config{}
+	//config.AllowAllOrigins = true
 	config.AllowOrigins = origins
 	config.AllowMethods = []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization"}
 	config.ExposeHeaders = []string{"Content-length"}
-	config.AllowCredentials = true
+	//config.AllowCredentials = true
 	config.MaxAge = 12 * time.Hour
 
 	router.Use(cors.New(config))
 	router.Use(gin.Logger())
 
 	var client *mongo.Client = database.Connect()
-	
+
 	// good to ping database before we setup routes here.
 	if err := client.Ping(context.Background(), nil); err != nil {
 		log.Fatalf("FAILED to reach server: %v", err)
