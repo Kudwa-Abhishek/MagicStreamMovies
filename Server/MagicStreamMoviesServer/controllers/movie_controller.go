@@ -383,6 +383,7 @@ func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context
 	}
 	return genreNames, nil
 }
+//handler Function for an endpoint that can be used to retrieve all of the genres stored within genres collection.
 func GetGenres(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
@@ -406,4 +407,3 @@ func GetGenres(client *mongo.Client) gin.HandlerFunc {
 
 	}
 }
-//handler Function for an endpoint that can be used to retrieve all of the genres stored within genres collection.
