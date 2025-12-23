@@ -13,20 +13,18 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-// creating a struct for JWT token
 type SignedDetails struct {
-	Email                string
-	FirstName            string
-	LastName             string
-	Role                 string
-	UserId               string
-	jwt.RegisteredClaims //struct within struct -> based on RFC-5719 -> has issuer, subject, audieence, expiry time, issued at, ID.
+	Email     string
+	FirstName string
+	LastName  string
+	Role      string
+	UserId    string
+	jwt.RegisteredClaims
 }
 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 var SECRET_REFRESH_KEY string = os.Getenv("SECRET_REFRESH_KEY")
 
-// Generate all tokens function
 func GenerateAllTokens(email, firstName, lastName, role, userId string) (string, string, error) {
 	claims := &SignedDetails{
 		Email:     email,
@@ -35,7 +33,6 @@ func GenerateAllTokens(email, firstName, lastName, role, userId string) (string,
 		Role:      role,
 		UserId:    userId,
 		RegisteredClaims: jwt.RegisteredClaims{
-			//Including user specific details in token
 			Issuer:    "MagicStream",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
@@ -55,7 +52,6 @@ func GenerateAllTokens(email, firstName, lastName, role, userId string) (string,
 		Role:      role,
 		UserId:    userId,
 		RegisteredClaims: jwt.RegisteredClaims{
-			//Including user specific details in token
 			Issuer:    "MagicStream",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * 7 * time.Hour)),
@@ -72,8 +68,7 @@ func GenerateAllTokens(email, firstName, lastName, role, userId string) (string,
 
 }
 
-// save these tokens to the database within relevant user document within user collection
-func UpdateAllTokens(userId, token, refresh_token string, client *mongo.Client) (err error) {
+func UpdateAllTokens(userId, token, refreshToken string, client *mongo.Client) (err error) {
 	var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
@@ -82,7 +77,7 @@ func UpdateAllTokens(userId, token, refresh_token string, client *mongo.Client) 
 	updateData := bson.M{
 		"$set": bson.M{
 			"token":         token,
-			"refresh_token": refresh_token,
+			"refresh_token": refreshToken,
 			"update_at":     updateAt,
 		},
 	}
@@ -95,25 +90,28 @@ func UpdateAllTokens(userId, token, refresh_token string, client *mongo.Client) 
 		return err
 	}
 	return nil
-
 }
 
-// create function to extract token from header of incoming http request
 func GetAccessToken(c *gin.Context) (string, error) {
-	authHeader := c.Request.Header.Get("Authorization")
-	if authHeader == "" {
-		return "", errors.New("Authorization header is required")
-	}
-	tokenString := authHeader[len("Bearer "):] //here we are extracting the token from authorization setting
+	// authHeader := c.Request.Header.Get("Authorization")
+	// if authHeader == "" {
+	// 	return "", errors.New("Authorization header is required")
+	// }
+	// tokenString := authHeader[len("Bearer "):]
 
-	if tokenString == "" {
-		return "", errors.New("bearer token is required")
+	// if tokenString == "" {
+	// 	return "", errors.New("Bearer token is required")
+	// }
+	tokenString, err := c.Cookie("access_token")
+	if err != nil {
+
+		return "", err
 	}
 
 	return tokenString, nil
+
 }
 
-// function to validate the access token
 func ValidateToken(tokenString string) (*SignedDetails, error) {
 	claims := &SignedDetails{}
 
@@ -124,7 +122,7 @@ func ValidateToken(tokenString string) (*SignedDetails, error) {
 		return nil, err
 	}
 
-	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok { //critical security step to stop spoofing algorithm attacks
+	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, err
 	}
 
@@ -135,6 +133,7 @@ func ValidateToken(tokenString string) (*SignedDetails, error) {
 	return claims, nil
 
 }
+
 func GetUserIdFromContext(c *gin.Context) (string, error) {
 	userId, exists := c.Get("userId")
 
@@ -143,11 +142,13 @@ func GetUserIdFromContext(c *gin.Context) (string, error) {
 	}
 
 	id, ok := userId.(string)
+
 	if !ok {
 		return "", errors.New("unable to retrieve userId")
 	}
 
 	return id, nil
+
 }
 
 func GetRoleFromContext(c *gin.Context) (string, error) {
@@ -158,11 +159,13 @@ func GetRoleFromContext(c *gin.Context) (string, error) {
 	}
 
 	memberRole, ok := role.(string)
+
 	if !ok {
 		return "", errors.New("unable to retrieve userId")
 	}
 
 	return memberRole, nil
+
 }
 
 func ValidateRefreshToken(tokenString string) (*SignedDetails, error) {

@@ -57,7 +57,7 @@ const Register = () => {
             // Registration successful, redirect to login
             navigate('/login', { replace: true });
         } catch (err) {
-            setError('Registration failed. Please try again.');
+            setError('Registration failed. Please try again.', err);
         } finally {
             setLoading(false);
         }
@@ -68,6 +68,7 @@ const Register = () => {
         const fetchGenres = async () => {
         try {
             const response = await axiosClient.get('/genres');
+            console.log('GENRES RESPONSE:', response.data);
             setGenres(response.data);
         } catch (error) {
             console.error('Error fetching movie genres:', error);
@@ -151,7 +152,7 @@ const Register = () => {
                             value={favouriteGenres.map(g => String(g.genre_id))}
                             onChange={handleGenreChange}
                         >
-                            {genres.map(genre => (
+                            {Array.isArray(genres) && genres.map(genre => (
                                 <option key={genre.genre_id} value={genre.genre_id} label={genre.genre_name}>
                                     {genre.genre_name}
                                 </option>

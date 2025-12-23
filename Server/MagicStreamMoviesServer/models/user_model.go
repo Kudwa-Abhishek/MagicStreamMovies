@@ -16,7 +16,7 @@ type User struct {
 	Password        string        `json:"password" bson:"password" validate:"required,min=6"`
 	Role            string        `json:"role" bson:"role" validate:"oneof=ADMIN USER"` //role -> either admin or user
 	CreatedAt       time.Time     `json:"created_at" bson:"created_at"`
-	UpdatedAt       time.Time     `json:"updated_at" bson:"updated_at"`
+	UpdatedAt       time.Time     `json:"update_at" bson:"update_at"`
 	Token           string        `json:"token" bson:"token"` // we'll be using JWT/ JSON web token for authn, authz.
 	RefreshToken    string        `json:"refresh_token" bson:"refresh_token"`
 	FavouriteGenres []Genre       `json:"favourite_genres" bson:"favourite_genres" validate:"required,dive"` // array of genres user likes-> this Genre is got from movie_model.go itself bcuz of same package models

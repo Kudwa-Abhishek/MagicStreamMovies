@@ -16,16 +16,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// function to Hash pass
 func HashPassword(password string) (string, error) {
 	HashPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
+
 	return string(HashPassword), nil
+
 }
 
-// basic structure for registering user endpoint handler func
 func RegisterUser(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
@@ -34,14 +34,13 @@ func RegisterUser(client *mongo.Client) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input data"})
 			return
 		}
-		// new validator
 		validate := validator.New()
 
 		if err := validate.Struct(user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Validation failed", "details": err.Error()})
 			return
 		}
-		// Hash the password before storing
+
 		hashedPassword, err := HashPassword(user.Password)
 
 		if err != nil {
@@ -49,25 +48,26 @@ func RegisterUser(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var ctx, cancel = context.WithTimeout(c, 100*time.Second)
 		defer cancel()
 
 		var userCollection *mongo.Collection = database.OpenCollection("users", client)
 
-		//email uniqueness check
-		count, err := userCollection.CountDocuments(ctx, bson.M{"email": user.Email})
+		count, err := userCollection.CountDocuments(ctx, bson.D{{Key: "email", Value: user.Email}})
+
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing user/ email"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to check existing user"})
 			return
 		}
 		if count > 0 {
-			c.JSON(http.StatusConflict, gin.H{"error": "User already exists!"})
+			c.JSON(http.StatusConflict, gin.H{"error": "User already exists"})
 			return
 		}
-		user.UserID = bson.NewObjectID().Hex() // to create unique user id for user
-		user.CreatedAt = time.Now()            // time at created
-		user.UpdatedAt = time.Now()            // time at updated into collection
-		user.Password = hashedPassword         // set hashed password
+		user.UserID = bson.NewObjectID().Hex()
+		user.CreatedAt = time.Now()
+		user.UpdatedAt = time.Now()
+		user.Password = hashedPassword
+
 		result, err := userCollection.InsertOne(ctx, user)
 
 		if err != nil {
@@ -76,10 +76,11 @@ func RegisterUser(client *mongo.Client) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusCreated, result)
+
 	}
+
 }
 
-// infra for handler func
 func LoginUser(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var userLogin models.UserLogin
@@ -154,6 +155,7 @@ func LoginUser(client *mongo.Client) gin.HandlerFunc {
 
 	}
 }
+
 func LogoutHandler(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Clear the access_token cookie
@@ -220,6 +222,7 @@ func LogoutHandler(client *mongo.Client) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 	}
 }
+
 func RefreshTokenHandler(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(c, 100*time.Second)

@@ -22,12 +22,8 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-
-
-
 // creating instance/object of validator
 var validate = validator.New()
-
 
 // this func used to return collection of movie data queried from mongodb database and return to client
 // Capital func name as we need this func to be public.
@@ -78,7 +74,6 @@ func GetMovie(client *mongo.Client) gin.HandlerFunc {
 
 		// creating connection to our movies collection
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
-
 
 		err := movieCollection.FindOne(ctx, bson.M{"imdb_id": movieID}).Decode(&movie)
 
@@ -177,7 +172,6 @@ func AdminReviewUpdate(client *mongo.Client) gin.HandlerFunc {
 		// creating connection to our movies collection
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
 
-
 		//Update one method to update single document in Mongodb
 		result, err := movieCollection.UpdateOne(ctx, filter, update)
 
@@ -236,7 +230,7 @@ func GetReviewRanking(admin_review string, client *mongo.Client, c *gin.Context)
 	//we want to replace {rankings} in .env with actual rankings from mongodb
 	base_prompt := strings.Replace(base_prompt_template, "{rankings}", sentimentDelimited, 1)
 	//actually calling OpenAi to get response
-	response, err := llm.Call(context.Background(), base_prompt+admin_review)
+	response, err := llm.Call(c, base_prompt+admin_review)
 
 	if err != nil {
 		return "", 0, err
@@ -262,7 +256,6 @@ func GetRankings(client *mongo.Client, c *gin.Context) ([]models.Ranking, error)
 
 	// creating ranking collection
 	var rankingCollection *mongo.Collection = database.OpenCollection("rankings", client)
-
 
 	cursor, err := rankingCollection.Find(ctx, bson.M{})
 
@@ -318,7 +311,6 @@ func GetRecommendedMovies(client *mongo.Client) gin.HandlerFunc {
 
 		// creating connection to our movies collection
 		var movieCollection *mongo.Collection = database.OpenCollection("movies", client)
-
 
 		cursor, err := movieCollection.Find(ctx, filter, findOptions)
 
@@ -383,7 +375,8 @@ func GetUsersFavouriteGenres(userId string, client *mongo.Client, c *gin.Context
 	}
 	return genreNames, nil
 }
-//handler Function for an endpoint that can be used to retrieve all of the genres stored within genres collection.
+
+// handler Function for an endpoint that can be used to retrieve all of the genres stored within genres collection.
 func GetGenres(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var ctx, cancel = context.WithTimeout(c, 100*time.Second)

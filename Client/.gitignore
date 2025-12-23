@@ -1,0 +1,17 @@
+# Environment files (DO NOT COMMIT)
+.env
+.env.*
+Client/**/.env
+Server/**/.env
+
+# Node
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# OS / Editor junk
+.DS_Store
+.vscode/
+.idea/
