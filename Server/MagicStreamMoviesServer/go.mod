@@ -1,6 +1,6 @@
 module github.com/Kudwa-Abhishek/MagicStreamMovies/Server/MagicStreamMoviesServer
 
-go 1.25.4
+go 1.25
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
